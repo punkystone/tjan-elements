@@ -1,0 +1,6 @@
+services:
+  tjan-elements:
+    container_name: tjan-elements
+    build:
+      context: .
+      dockerfile: Dockerfile
