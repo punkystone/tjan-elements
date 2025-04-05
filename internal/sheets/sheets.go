@@ -3,7 +3,9 @@ package sheets
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
+	"tjan-elements/internal/twitch"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -11,8 +13,16 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
+const (
+	subIndex      = "Z3"
+	subGiftIndex  = "Z4"
+	donationIndex = "Z5"
+	bitIndex      = "Z6"
+)
+
 type GoogleSheet struct {
 	service *sheets.Service
+	id      string
 }
 
 func CreateAuthURL() (string, error) {
@@ -81,21 +91,36 @@ func NewGoogleSheet() (*GoogleSheet, error) {
 		service: service,
 	}, nil
 }
+func (googleSheet *GoogleSheet) SetId(id string) {
+	googleSheet.id = id
+}
 
-func (googleSheet *GoogleSheet) UpdateValue(id string, field string, value string) error {
-	valueRange := &sheets.ValueRange{
-		Range:  field,
-		Values: [][]any{{value}},
+func (googleSheet *GoogleSheet) AddSub(sub *twitch.Sub) error {
+	nextSubCell, err := googleSheet.getValue(subIndex)
+	if err != nil {
+		return err
 	}
-	_, err := googleSheet.service.Spreadsheets.Values.Update(id, valueRange.Range, valueRange).ValueInputOption("USER_ENTERED").Do()
+	err = googleSheet.updateValue(fmt.Sprintf("B%s", nextSubCell.Values[0][0]), sub.Name)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (googleSheet *GoogleSheet) GetValue(id string, field string) (*sheets.ValueRange, error) {
-	response, err := googleSheet.service.Spreadsheets.Values.Get(id, field).Do()
+func (googleSheet *GoogleSheet) updateValue(field string, value string) error {
+	valueRange := &sheets.ValueRange{
+		Range:  field,
+		Values: [][]any{{value}},
+	}
+	_, err := googleSheet.service.Spreadsheets.Values.Update(googleSheet.id, valueRange.Range, valueRange).ValueInputOption("USER_ENTERED").Do()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (googleSheet *GoogleSheet) getValue(field string) (*sheets.ValueRange, error) {
+	response, err := googleSheet.service.Spreadsheets.Values.Get(googleSheet.id, field).Do()
 	if err != nil {
 		return nil, err
 	}
