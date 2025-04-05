@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const sheetID = "15Fd7qS7_sctKqBjzgwVYs59V3iI4yNo0Exp_G4iDTcI"
+const sheetID = "1HPPdHKFYDda4OboNPjYKzQupJDxKNA02utjG8HQuTXo"
 
 func main() {
 	googleSheet, err := sheets.NewGoogleSheet()
@@ -15,7 +15,7 @@ func main() {
 		log.Error().Msgf("Error creating sheet service: %v", err)
 		return
 	}
-	googleSheet.SetId(sheetID)
+	googleSheet.SetID(sheetID)
 	chat := twitch.InitChat()
 	go chat.StartChat()
 
@@ -28,12 +28,23 @@ func main() {
 			}
 			log.Info().Msgf("Sub: %s", event.Name)
 		case twitch.SubGift:
+			err := googleSheet.AddSubGift(&event)
+			if err != nil {
+				log.Error().Msgf("Error adding sub gift to sheet: %v", err)
+			}
 			log.Info().Msgf("Sub Gift %dx : %s -> %v", *event.Count, event.Gifter, event.Receivers)
 		case twitch.Donation:
+			err := googleSheet.AddDonation(&event)
+			if err != nil {
+				log.Error().Msgf("Error adding donation to sheet: %v", err)
+			}
 			log.Info().Msgf("Donation: %s -  €%.2f", event.Name, event.Amount)
 		case twitch.Bits:
+			err := googleSheet.AddBits(&event)
+			if err != nil {
+				log.Error().Msgf("Error adding bits to sheet: %v", err)
+			}
 			log.Info().Msgf("Bits: %s - %d bits", event.Name, event.Amount)
 		}
-
 	}
 }
