@@ -4,3 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./credentials.json:/credentials.json
+      - ./token.json:/token.json
