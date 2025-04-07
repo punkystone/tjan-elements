@@ -36,7 +36,7 @@ var donationPattern = regexp.MustCompile(`([^\s]+) spendet €([^\s]+) tjanL Dan
 
 const reconnectInterval = 10 * time.Second
 
-const minimumBits = 500
+const minimumBits = 200
 
 func InitChat() *Chat {
 	client := twitch.NewAnonymousClient()
