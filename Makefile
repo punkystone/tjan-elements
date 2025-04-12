@@ -22,3 +22,6 @@ url:
 	
 token:
 	@go run cmd/token/main.go $(CODE)
+
+fill:
+	@go run cmd/fill/main.go

@@ -159,3 +159,13 @@ func (chat *Chat) handleMessage(message twitch.PrivateMessage) {
 		Amount: amount,
 	}
 }
+
+func (chat *Chat) Parse(message string) {
+	parsedMessage := twitch.ParseMessage(message)
+	switch message := parsedMessage.(type) {
+	case *twitch.PrivateMessage:
+		chat.handleMessage(*message)
+	case *twitch.UserNoticeMessage:
+		chat.handleUserNotice(*message)
+	}
+}
